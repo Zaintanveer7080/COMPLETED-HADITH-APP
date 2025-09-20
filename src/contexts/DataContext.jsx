@@ -127,11 +127,25 @@ export const DataProvider = ({ children }) => {
     }
   };
 
+  // ==== UPDATED: fix update-only error by stripping non-table fields like `creator_name` ====
   const updateEntry = async (id, updatedData) => {
     try {
+      // Remove fields that are not real columns in `entries`
+      const {
+        creator_name,     // comes from view/UI; not a column in `entries`
+        id: _ignoreId,    // never send id in the payload
+        created_at: _ca,  // keep original created_at
+        ...rest
+      } = updatedData || {};
+
+      const payload = {
+        ...rest,
+        updated_at: new Date().toISOString(),
+      };
+
       const { data, error } = await supabase
         .from('entries')
-        .update({ ...updatedData, updated_at: new Date().toISOString() })
+        .update(payload)
         .eq('id', id)
         .select()
         .single();
@@ -145,7 +159,7 @@ export const DataProvider = ({ children }) => {
         description: "Entry updated successfully.",
       });
       
-      return { success: true };
+      return { success: true, data };
     } catch (error) {
       toast({
         title: "Error",
@@ -155,6 +169,7 @@ export const DataProvider = ({ children }) => {
       return { success: false, error: error.message };
     }
   };
+  // ===================================================================
 
   const deleteEntry = async (id) => {
     try {
