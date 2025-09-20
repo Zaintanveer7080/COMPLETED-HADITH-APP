@@ -93,7 +93,7 @@ const Dashboard = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {statCards.map((stat, index) => (
             <motion.div key={stat.title} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.1 }}>
-              <Card className="relative overflow-hidden hover:shadow-lg transition-all duration-300 hover:-translate-y-1 group flex flex-col">
+              <Card className="relative overflow-hidden hover:shadow-lg transition-all duration-300 hover:-translate-y-1 group flex flex-col h-full">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
                   <div className={`p-2 rounded-lg ${stat.bgColor}`}><stat.icon className="w-4 h-4 text-muted-foreground" /></div>
@@ -101,8 +101,8 @@ const Dashboard = () => {
                 <CardContent className="cursor-pointer flex-grow" onClick={() => stat.content && navigate(`/entry/${stat.content.id}`)}>
                   {stat.content ? (
                     <div className="space-y-1">
-                      <p className="text-sm arabic-text">{stat.content.arabic_text}</p>
-                      <p className="text-xs urdu-text text-muted-foreground">{stat.urdu_translation}</p>
+                      <p className="text-sm arabic-text truncate">{stat.content.arabic_text}</p>
+                      <p className="text-xs urdu-text text-muted-foreground truncate">{stat.content.urdu_translation}</p>
                     </div>
                   ) : (
                     <>
@@ -148,7 +148,7 @@ const Dashboard = () => {
                         <p className="text-xs text-muted-foreground urdu-text truncate">{entry.urdu_translation}</p>
                       </div>
                       <div className="text-right">
-                        <Badge variant={entry.type === 'hadith' ? 'default' : 'secondary'} className="mb-1">{entry.type}</Badge>
+                        <Badge variant={entry.type === 'hadith' ? 'default' : 'secondary'} className="mb-1 capitalize">{entry.type}</Badge>
                         <p className="text-xs text-muted-foreground">{formatDistanceToNow(new Date(entry.created_at), { addSuffix: true })}</p>
                       </div>
                     </motion.div>
