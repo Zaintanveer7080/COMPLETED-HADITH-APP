@@ -30,7 +30,7 @@ export const DataProvider = ({ children }) => {
     setLoading(true);
     try {
       const { data, error } = await supabase
-        .from('entries')
+        .from('entries_with_users')
         .select('*')
         .order('created_at', { ascending: false });
 
@@ -69,7 +69,7 @@ export const DataProvider = ({ children }) => {
 
       if (error) throw error;
 
-      setEntries(prev => [data, ...prev]);
+      await refreshData();
       
       addNotification({
         type: 'success',
@@ -108,7 +108,7 @@ export const DataProvider = ({ children }) => {
 
       if (error) throw error;
 
-      setEntries(prev => [...data, ...prev].sort((a, b) => new Date(b.created_at) - new Date(a.created_at)));
+      await refreshData();
 
       toast({
         title: "Import Successful",
@@ -138,7 +138,7 @@ export const DataProvider = ({ children }) => {
 
       if (error) throw error;
 
-      setEntries(prev => prev.map(entry => (entry.id === id ? data : entry)));
+      await refreshData();
       
       toast({
         title: "Success!",
