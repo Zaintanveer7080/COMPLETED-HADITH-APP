@@ -85,7 +85,8 @@ const DetailView = () => {
               <Badge variant={entry.type === 'hadith' ? 'default' : 'secondary'}>{entry.type}</Badge>
             </div>
             <CardDescription>
-              Added by {entry.created_by} on {format(new Date(entry.created_at), 'PPP p')}
+              {/* CHANGED: use profile name from the view, fallback to 'User' */}
+              Added by {entry.creator_name || 'User'} on {format(new Date(entry.created_at), 'PPP p')}
             </CardDescription>
           </CardHeader>
           <CardContent className="p-6 space-y-8">
