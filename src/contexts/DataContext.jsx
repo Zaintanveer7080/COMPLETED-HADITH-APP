@@ -19,14 +19,24 @@ export const DataProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
   const { addNotification } = useNotifications();
-  const { user } = useAuth();
+  // IMPORTANT: also read auth loading so we don't fetch too early
+  const { user, loading: authLoading } = useAuth();
 
-  const refreshData = useCallback(async () => {
+  /**
+   * Fetch entries after auth is ready.
+   * @param {boolean} suppressToast - if true, don't toast errors (useful on first load).
+   */
+  const refreshData = useCallback(async (suppressToast = false) => {
+    // If auth is still restoring the session, wait.
+    if (authLoading) return;
+
+    // If no user (not logged in), clear and stop.
     if (!user) {
       setEntries([]);
       setLoading(false);
       return;
     }
+
     setLoading(true);
     try {
       const { data, error } = await supabase
@@ -38,20 +48,26 @@ export const DataProvider = ({ children }) => {
       setEntries(data || []);
     } catch (error) {
       console.error("Failed to fetch entries from Supabase", error);
-      toast({
-        title: "Error",
-        description: "Could not fetch data. Please check your connection.",
-        variant: "destructive",
-      });
       setEntries([]);
+      if (!suppressToast) {
+        toast({
+          title: "Error",
+          description: "Could not fetch data. Please check your connection.",
+          variant: "destructive",
+        });
+      }
     } finally {
       setLoading(false);
     }
-  }, [user, toast]);
+  }, [user, authLoading, toast]);
 
+  // First load: wait for auth to be ready; suppress toast for transient races.
   useEffect(() => {
-    refreshData();
-  }, [refreshData]);
+    if (!authLoading) {
+      // On initial mount after auth is ready, avoid showing an error toast for transient issues.
+      refreshData(true);
+    }
+  }, [authLoading, refreshData]);
 
   const addEntry = async (entryData) => {
     if (!user) return { success: false, error: 'User not authenticated' };
@@ -127,14 +143,13 @@ export const DataProvider = ({ children }) => {
     }
   };
 
-  // ==== UPDATED: fix update-only error by stripping non-table fields like `creator_name` ====
+  // === UPDATED: strip non-table fields (e.g., creator_name) ONLY for updates ===
   const updateEntry = async (id, updatedData) => {
     try {
-      // Remove fields that are not real columns in `entries`
       const {
-        creator_name,     // comes from view/UI; not a column in `entries`
-        id: _ignoreId,    // never send id in the payload
-        created_at: _ca,  // keep original created_at
+        creator_name,
+        id: _ignoreId,
+        created_at: _ignoreCreatedAt,
         ...rest
       } = updatedData || {};
 
@@ -169,7 +184,6 @@ export const DataProvider = ({ children }) => {
       return { success: false, error: error.message };
     }
   };
-  // ===================================================================
 
   const deleteEntry = async (id) => {
     try {
