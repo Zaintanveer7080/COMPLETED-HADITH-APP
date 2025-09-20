@@ -143,7 +143,7 @@ const Browse = () => {
                     <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
                       <div className="flex-1 space-y-2">
                         <div className="flex items-center space-x-2">
-                          <Badge variant={entry.type === 'hadith' ? 'default' : 'secondary'}>{entry.type === 'hadith' ? <Scroll className="w-3 h-3 mr-1.5" /> : <BookOpen className="w-3 h-3 mr-1.5" />} {entry.type}</Badge>
+                          <Badge variant={entry.type === 'hadith' ? 'default' : 'secondary'} className="capitalize">{entry.type === 'hadith' ? <Scroll className="w-3 h-3 mr-1.5" /> : <BookOpen className="w-3 h-3 mr-1.5" />} {entry.type}</Badge>
                           <span className="text-sm text-muted-foreground">{entry.reference_full || entry.quran_reference}</span>
                         </div>
                         <p className="arabic-text text-lg leading-relaxed">{entry.arabic_text}</p>
